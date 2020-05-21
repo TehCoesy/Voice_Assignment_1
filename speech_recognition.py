@@ -9,7 +9,7 @@ import pickle as pk
 CLASS_LABELS = {"cho_biet", "khach", "khong", "toi", "nguoi"}
 # Directory name of sound files must match labels
 
-TEST_SIZE = 20
+TEST_SIZE = 5
 # Number of sound files reserved for testing (<100)
 
 def get_label_data(label):
@@ -40,12 +40,14 @@ if __name__ == "__main__":
 
     models = {}
     for labels in CLASS_LABELS:
-        class_vectors = train_dataset[labels]
+        class_vectors_x = train_dataset[labels]
+        class_vectors_y = test_dataset[labels]
         # convert all vectors to the cluster index
         # dataset['one'] = [O^1, ... O^R]
         # O^r = (c1, c2, ... ct, ... cT)
         # O^r size T x 1
         train_dataset[labels] = list([kmeans_x.predict(v).reshape(-1,1) for v in train_dataset[labels]])
+        test_dataset[labels] = list([kmeans_y.predict(v).reshape(-1,1) for v in test_dataset[labels]])
         hmm = hmmlearn.hmm.MultinomialHMM(
             n_components=6, random_state=0, n_iter=1000, verbose=True,
             startprob_prior=np.array([0.7,0.2,0.1,0.0,0.0,0.0]),
@@ -67,8 +69,12 @@ if __name__ == "__main__":
         
     print("Training done")
 
-def test_sound_files():
-    return 1
+    print("Testing (Higher is better)")
+    for true_cname in CLASS_LABELS:
+        for O in train_dataset[true_cname]:
+            score = {cname : model.score(O, [len(O)]) for cname, model in models.items()}
+            print(true_cname, score)
 
-def test_live():
-    return 1
+    print("Exporting models")
+    for label in CLASS_LABELS:
+        with open(os.path.join("Models", label + ".pkl"), "wb+") as file: pk.dump(models[label], file)
