@@ -12,6 +12,8 @@ CLASS_LABELS = {"cho_biet", "khach", "khong", "toi", "nguoi"}
 TEST_SIZE = 5
 # Number of sound files reserved for testing (<100)
 
+#np.set_printoptions(precision=3)
+
 def get_label_data(label):
     files = os.listdir(label)
     test_mfcc = [MFCC.get_mfcc(os.path.join(label, f)) for f in files[:TEST_SIZE] if f.endswith("wav")]
@@ -49,15 +51,21 @@ if __name__ == "__main__":
         train_dataset[labels] = list([kmeans_x.predict(v).reshape(-1,1) for v in train_dataset[labels]])
         test_dataset[labels] = list([kmeans_y.predict(v).reshape(-1,1) for v in test_dataset[labels]])
         hmm = hmmlearn.hmm.MultinomialHMM(
-            n_components=6, random_state=0, n_iter=1000, verbose=True,
-            startprob_prior=np.array([0.7,0.2,0.1,0.0,0.0,0.0]),
+            n_components=12, random_state=0, n_iter=1000, verbose=True,
+            startprob_prior=np.array([0.1,0.1,0.1,0.2,0.1,0.1,0.1,0.1,0.1,0.2,0.1,0.1]),
             transmat_prior=np.array([
-                [0.1,0.5,0.1,0.1,0.1,0.1,],
-                [0.1,0.1,0.5,0.1,0.1,0.1,],
-                [0.1,0.1,0.1,0.5,0.1,0.1,],
-                [0.1,0.1,0.1,0.1,0.5,0.1,],
-                [0.1,0.1,0.1,0.1,0.1,0.5,],
-                [0.1,0.1,0.1,0.1,0.1,0.5,],
+                [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.5,],
+                [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.5,],
+                [0.0,0.0,0.0,0.0,0.1,0.1,0.1,0.1,0.1,0.5,0.1,0.1,],
+                [0.0,0.0,0.0,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.5,0.1,],
+                [0.0,0.0,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.5,],
+                [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.5,],
+                [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.5,],
+                [0.0,0.0,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.5,],
+                [0.0,0.0,0.0,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.5,0.1,],
+                [0.0,0.0,0.0,0.0,0.1,0.1,0.1,0.1,0.1,0.5,0.1,0.1,],
+                [0.0,0.0,0.0,0.0,0.0,0.0,1.1,0.1,0.5,0.1,0.1,0.1,],
+                [0.0,0.0,0.0,0.0,0.0,0.0,0.1,0.5,0.1,0.1,0.1,0.1,],
             ]),
         )
         X = np.concatenate(train_dataset[labels])
@@ -70,11 +78,21 @@ if __name__ == "__main__":
     print("Training done")
 
     print("Testing (Higher is better)")
+    model_acc = {}
     for true_cname in CLASS_LABELS:
+        hits = 0
         for O in train_dataset[true_cname]:
-            score = {cname : model.score(O, [len(O)]) for cname, model in models.items()}
-            print(true_cname, score)
+            evals = {cname : model.score(O, [len(O)]) for cname, model in models.items()}
+            print(true_cname, evals)
+            if max(evals.keys(), key=(lambda k: evals[k])) == true_cname:
+                print("Hit")
+                hits += 1
+            else:
+                print("Miss")
+        model_acc[true_cname] = hits
+
+    print(model_acc)
 
     print("Exporting models")
     for label in CLASS_LABELS:
-        with open(os.path.join("Models", label + ".pkl"), "wb+") as file: pk.dump(models[label], file)
+        with open(os.path.join("Models", label + ".pkl"), "wb") as file: pk.dump(models[label], file)
