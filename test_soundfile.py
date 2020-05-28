@@ -24,8 +24,8 @@ if __name__ == "__main__":
         with open(os.path.join("Models", label + ".pkl"), "rb") as file: models[label] = pk.load(file)
 
     sound_mfcc = MFCC.get_mfcc(args.test)
-    #kmeans = clustering(sound_mfcc)
-    #sound_mfcc = kmeans.predict(sound_mfcc).reshape(-1,1)
+    kmeans = clustering(sound_mfcc)
+    sound_mfcc = kmeans.predict(sound_mfcc).reshape(-1,1)
 
     evals = {cname : model.score(sound_mfcc, [len(sound_mfcc)]) for cname, model in models.items()}
     cmax = max(evals.keys(), key=(lambda k: evals[k]))
