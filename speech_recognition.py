@@ -12,7 +12,7 @@ import pickle as pk
 CLASS_LABELS = {"cho_biet", "khach", "khong", "toi", "nguoi"}
 # Directory name of sound files must match labels
 
-TEST_SIZE = 5
+TEST_SIZE = 10
 # Number of sound files reserved for testing (<100)
 
 #np.set_printoptions(precision=3)
@@ -54,21 +54,21 @@ if __name__ == "__main__":
         train_dataset[labels] = list([kmeans_x.predict(v).reshape(-1,1) for v in train_dataset[labels]])
         test_dataset[labels] = list([kmeans_y.predict(v).reshape(-1,1) for v in test_dataset[labels]])
         hmm = hmmlearn.hmm.MultinomialHMM(
-            n_components=14, random_state=0, n_iter=1000, verbose=True,params='te',init_params='te'
+            n_components=14, random_state=0, n_iter=1000, verbose=True,params='te',init_params='e'
         )
-        hmm.startprob_ = np.array([0.5,0.2,0.1,0.1,0.1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
+        hmm.startprob_ = np.array([0.7,0.2,0.1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
         hmm.transmat_ = np.array([
-        [0.5,0.3,0.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
-        [0.0,0.5,0.3,0.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
-        [0.0,0.0,0.5,0.3,0.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
-        [0.0,0.0,0.0,0.5,0.3,0.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
-        [0.0,0.0,0.0,0.0,0.5,0.3,0.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
-        [0.0,0.0,0.0,0.0,0.0,0.5,0.3,0.2,0.0,0.0,0.0,0.0,0.0,0.0],
-        [0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.3,0.2,0.0,0.0,0.0,0.0,0.0],
-        [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.3,0.2,0.0,0.0,0.0,0.0],
-        [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.3,0.2,0.0,0.0,0.0],
-        [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.3,0.2,0.0,0.0],
-        [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.3,0.2,0.0],
+        [0.7,0.2,0.1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
+        [0.0,0.7,0.2,0.1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
+        [0.0,0.0,0.7,0.2,0.1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
+        [0.0,0.0,0.0,0.7,0.2,0.1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
+        [0.0,0.0,0.0,0.0,0.7,0.2,0.1,0.0,0.0,0.0,0.0,0.0,0.0,0.0],
+        [0.0,0.0,0.0,0.0,0.0,0.7,0.2,0.1,0.0,0.0,0.0,0.0,0.0,0.0],
+        [0.0,0.0,0.0,0.0,0.0,0.0,0.7,0.2,0.1,0.0,0.0,0.0,0.0,0.0],
+        [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.7,0.2,0.1,0.0,0.0,0.0,0.0],
+        [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.7,0.2,0.1,0.0,0.0,0.0],
+        [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.7,0.2,0.1,0.0,0.0],
+        [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.7,0.2,0.1,0.0],
         [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.7,0.3,0.0],
         [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.5],
         [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0],
@@ -80,11 +80,12 @@ if __name__ == "__main__":
         print(X.shape, lengths, len(lengths))
         hmm.fit(X, lengths=lengths)
         models[labels] = hmm
-        
+
     print("Training done")
 
     print("Testing (Higher is better)")
-    model_acc = {}
+    model_acc_train = {}
+    model_acc_test = {}
     for true_cname in CLASS_LABELS:
         hits = 0
         for O in train_dataset[true_cname]:
@@ -95,9 +96,22 @@ if __name__ == "__main__":
                 hits += 1
             else:
                 print("Miss")
-        model_acc[true_cname] = hits
+        model_acc_train[true_cname] = hits
 
-    print(model_acc)
+    for true_cname in CLASS_LABELS:
+        hits = 0
+        for O in test_dataset[true_cname]:
+            evals = {cname : model.score(O, [len(O)]) for cname, model in models.items()}
+            print(true_cname, evals)
+            if max(evals.keys(), key=(lambda k: evals[k])) == true_cname:
+                print("Hit")
+                hits += 1
+            else:
+                print("Miss")
+        model_acc_test[true_cname] = hits
+
+    print(model_acc_train)
+    print(model_acc_test)
 
     print("Exporting models")
     for label in CLASS_LABELS:
