@@ -31,3 +31,6 @@ if __name__ == "__main__":
     cmax = max(evals.keys(), key=(lambda k: evals[k]))
     print(evals)
     print("Conclusion: " + cmax)
+    evals.pop(cmax)
+    cmax = max(evals.keys(), key=(lambda k: evals[k]))
+    print("Runner Up: " + cmax)

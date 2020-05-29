@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings('ignore',category=FutureWarning)
+
 import os
 import MFCC
 import math
@@ -51,7 +54,7 @@ if __name__ == "__main__":
         train_dataset[labels] = list([kmeans_x.predict(v).reshape(-1,1) for v in train_dataset[labels]])
         test_dataset[labels] = list([kmeans_y.predict(v).reshape(-1,1) for v in test_dataset[labels]])
         hmm = hmmlearn.hmm.MultinomialHMM(
-            n_components=14, random_state=0, n_iter=1000, verbose=True,params='ste',init_params='te'
+            n_components=14, random_state=0, n_iter=1000, verbose=True,params='te',init_params='te'
         )
         hmm.startprob_ = np.array([0.5,0.2,0.1,0.1,0.1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
         hmm.transmat_ = np.array([
@@ -65,7 +68,7 @@ if __name__ == "__main__":
         [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.3,0.2,0.0,0.0,0.0,0.0],
         [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.3,0.2,0.0,0.0,0.0],
         [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.3,0.2,0.0,0.0],
-        [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.3,0.2,0.0,],
+        [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.3,0.2,0.0],
         [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.7,0.3,0.0],
         [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.5],
         [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0],
