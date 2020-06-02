@@ -15,7 +15,7 @@ import librosa
 import sounddevice as sd
 import soundfile as sf
 
-CLASS_LABELS = {"cho_biet", "khach", "khong", "toi", "nguoi"}
+CLASS_LABELS = {"cho_biet", "co_the", "khong", "toi", "nguoi"}
 
 # Controls
 STOP_RECORD_CMD = "/s"
@@ -65,16 +65,12 @@ def record(file_name):
     except Exception as e:
         print(e)
 
-# Kmeans
-def clustering(X, n_clusters=10):
-    kmeans = KMeans(n_clusters=n_clusters, n_init=50, random_state=0, verbose=0)
-    kmeans.fit(X)
-    return kmeans  
 
 if __name__ == "__main__":
     models = {}
     for label in CLASS_LABELS:
         with open(os.path.join("Models", label + ".pkl"), "rb") as file: models[label] = pk.load(file)
+    with open("Models/kmeans.pkl", "rb") as file: kmeans = pk.load(file)
 
     input("Press any key to start recording")
 
@@ -87,12 +83,12 @@ if __name__ == "__main__":
 
     os.remove("live_recording.wav")
 
-    kmeans = clustering(sound_mfcc)
     sound_mfcc = kmeans.predict(sound_mfcc).reshape(-1,1)
 
     evals = {cname : model.score(sound_mfcc, [len(sound_mfcc)]) for cname, model in models.items()}
     cmax = max(evals.keys(), key=(lambda k: evals[k]))
     print(evals)
     print("Conclusion: " + cmax)
-
-    
+    evals.pop(cmax)
+    cmax = max(evals.keys(), key=(lambda k: evals[k]))
+    print("Runner Up: " + cmax)
