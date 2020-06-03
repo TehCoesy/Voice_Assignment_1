@@ -7,26 +7,28 @@ import numpy as np
 import pickle as pk
 import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-t", "--test", help="Image input", required=True)
-args = parser.parse_args()
-
 CLASS_LABELS = {"cho_biet", "co_the", "khong", "toi", "nguoi"}
 
-if __name__ == "__main__":
+def runHMM(file_path):
     models = {}
     for label in CLASS_LABELS:
         with open(os.path.join("Models", label + ".pkl"), "rb") as file: models[label] = pk.load(file)
 
     with open("Models/kmeans.pkl", "rb") as file: kmeans = pk.load(file)
 
-    sound_mfcc = MFCC.get_mfcc(args.test)
+    sound_mfcc = MFCC.get_mfcc(file_path)
     sound_mfcc = kmeans.predict(sound_mfcc).reshape(-1,1)
 
     evals = {cname : model.score(sound_mfcc, [len(sound_mfcc)]) for cname, model in models.items()}
-    cmax = max(evals.keys(), key=(lambda k: evals[k]))
+    conclusion = max(evals.keys(), key=(lambda k: evals[k]))
+
+    return evals, conclusion
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--test", help="Image input", required=True)
+    args = parser.parse_args()
+
+    evals, conclusion = runHMM(args.test)
     print(evals)
-    print("Conclusion: " + cmax)
-    evals.pop(cmax)
-    cmax = max(evals.keys(), key=(lambda k: evals[k]))
-    print("Runner Up: " + cmax)
+    print("Conclusion: " + conclusion)
