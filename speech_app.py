@@ -58,12 +58,14 @@ class SpeechApp(QMainWindow):
     def stopRecord(self):
         self.RECORDING = False
         #print("Stop recording")
+        self.recordingThread.terminate()
         self.recordingThread = None
         self.changeFile("live_recording.wav")
 
     def chooseFile(self):
-        fileName = QFileDialog.getOpenFileName(self, "Open Image", "/home/jana", "Image Files (*.png *.jpg *.bmp)")
-        self.changeFile(fileName)
+        soundfile, _ = QFileDialog.getOpenFileName(self, "Open file", "/home", "Files (*.wav)")
+        filename = soundfile.rstrip(os.sep)
+        self.changeFile(filename)
         
     def changeFile(self, file_path):
         self.currentFile = file_path

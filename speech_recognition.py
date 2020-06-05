@@ -33,7 +33,7 @@ def get_label_data(directory):
 
     return train_mfcc, test_mfcc
 
-def clustering(X, n_clusters=10):
+def clustering(X, n_clusters=5):
     kmeans = KMeans(n_clusters=n_clusters, n_init=50, random_state=0, verbose=0)
     kmeans.fit(X)
     return kmeans  
@@ -41,14 +41,19 @@ def clustering(X, n_clusters=10):
 if __name__ == "__main__":
     train_dataset = {}
     test_dataset = {}
+    train_size = {}
+    test_size = {}
     X = {}
 
     # Loading MFCC
     for label in CLASS_LABELS:
         train_dataset[label], test_dataset[label] = get_label_data(os.path.join("SoundFiles", label))
         print(label)
-        print("Loaded test: ", len(test_dataset[label]), " files")
-        print("Loaded train: ", len(train_dataset[label]), " files")
+        train_size[label] = len(train_dataset[label])
+        test_size[label] = len(test_dataset[label])
+
+        print("Loaded test: ", test_size[label], " files")
+        print("Loaded train: ", train_size[label], " files")
 
     # Get all vectors in the datasets
     all_vectors = np.concatenate([np.concatenate(v, axis=0) for k, v in train_dataset.items()], axis=0)
@@ -193,6 +198,8 @@ if __name__ == "__main__":
     print("Training done")
 
     print("Testing (Higher is better)")
+    model_eval_train = {}
+    model_eval_test = {}
     model_acc_train = {}
     model_acc_test = {}
     for true_cname in CLASS_LABELS:
@@ -205,7 +212,8 @@ if __name__ == "__main__":
                 hits += 1
             else:
                 print("Miss")
-        model_acc_train[true_cname] = hits
+        model_eval_train[true_cname] = hits
+        model_acc_train[true_cname] = (hits / train_size[true_cname]) * 100
 
     for true_cname in CLASS_LABELS:
         hits = 0
@@ -217,9 +225,18 @@ if __name__ == "__main__":
                 hits += 1
             else:
                 print("Miss")
-        model_acc_test[true_cname] = hits
+        model_eval_test[true_cname] = hits
+        model_acc_test[true_cname] = (hits / test_size[true_cname]) * 100
 
+    print("Train dataset")
+    print("Number of hits")
+    print(model_eval_train)
+    print("Accuracy")
     print(model_acc_train)
+    print("Test dataset")
+    print("Number of hits")
+    print(model_eval_test)
+    print("Accuracy")
     print(model_acc_test)
 
     print("Exporting models")
